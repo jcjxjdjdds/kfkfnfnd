@@ -5,13 +5,13 @@ from pyrogram.types import ChatPermissions, ChatPrivileges
 import asyncio
 API_ID = 9157919
 API_HASH = "b90c282e584222babde5f68b5b63ee3b"
-BOT_TOKEN = "حط توكنك"
+BOT_TOKEN = "6947891378:AAHORS8V22hn0K1TQTE1W01OGY9C2viB9D4"
 
 app = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 
 
-#by > @PROGRAMMER_TOM / @BENN_DEV
+#by > @O_F_4 / @O_F_4
 
 
 welcome_enabled = True
