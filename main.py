@@ -4,7 +4,7 @@ from telebot import types
 session = requests.session()
 is_checking = False
 #——————————————————————#
-bot = telebot.TeleBot('5853271927:AAE_nfZVZwAoxQmahVpGUp-SDiYcBuHIq_k')
+bot = telebot.TeleBot('6525658406:AAGIH64g6sM0XzCepGPSYvFmVskLanf_YNQ')
 print("BoT Started")
 #——————————————————————#
 @bot.message_handler(commands=['start'])
